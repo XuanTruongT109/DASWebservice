@@ -14,13 +14,22 @@ namespace DASWebService
     // NOTE: In order to launch WCF Test Client for testing this service, please select DASService.svc or DASService.svc.cs at the Solution Explorer and start debugging.
     public class DASService : IDASService
     {
+        private static readonly log4net.ILog log = log4net.LogManager.GetLogger
+    (System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
         SqlConnection conn = new SqlConnection(ConfigurationManager.ConnectionStrings["ConStr"].ConnectionString);
         public string token = "7FEBE4AD-9B44-406B-A756-F553E7F212AE";
         public string InsertCus(Customer infoCus)
         {
             if (conn.State == System.Data.ConnectionState.Closed)
             {
-                conn.Open();
+                try
+                {
+                    conn.Open();
+                }
+                catch (Exception ex)
+                {
+                    log.Error("Cannot open database due to error", ex);
+                }
             }
             if(infoCus.Token == token)
             {
@@ -37,7 +46,8 @@ namespace DASWebService
                         int result = cmd.ExecuteNonQuery();
                         if (result == 1)
                         {
-                            return "Insert sucess to table CUSTMSTTABLE";
+                            log.Info(infoCus.ShiptoName.ToString() + " - Insert to CUSTMSTTABLE success");
+                            return "Insert success to table CUSTMSTTABLE";
                         }
                         else
                         {
@@ -47,10 +57,13 @@ namespace DASWebService
                 }
                 catch (Exception ex)
                 {
-                    throw ex;
+                    //throw ex;
+                    log.Error(infoCus.ShiptoName.ToString() + " - Fail to insert - ",ex);
+                    return "Fail to insert table CUSTMSTTABLE";
                 }
             }else
             {
+                log.Warn(infoCus.ShiptoName.ToString() + " - Provide wrong token");
                 return "Provide wrong token";
             }
             
@@ -59,7 +72,14 @@ namespace DASWebService
         {
             if (conn.State == System.Data.ConnectionState.Closed)
             {
-                conn.Open();
+                try
+                {
+                    conn.Open();
+                }
+                catch(Exception ex)
+                {
+                    log.Error("Cannot open database due to error", ex);
+                }
             }
             if (proHier.Token == token)
             {
@@ -78,7 +98,8 @@ namespace DASWebService
                         int result = cmd.ExecuteNonQuery();
                         if (result == 1)
                         {
-                            return "Insert sucess to table PRODHIERTABLE";
+                            log.Info(proHier.BrandCode.ToString() + " - Insert to PRODHIERTABLE success");
+                            return "Insert success to table PRODHIERTABLE";
                         }
                         else
                         {
@@ -88,17 +109,30 @@ namespace DASWebService
                 }
                 catch (Exception ex)
                 {
-                    throw ex;
+                    log.Error(proHier.BrandCode.ToString() + " - Fail to insert due to - ", ex);
+                    return "Fail to insert table PRODHIERTABLE";
                 }
             }
             else
             {
+                log.Warn(proHier.BrandCode.ToString() + " - Provide wrong token");
                 return "Provide wrong token";
             }
         }
         public DataSet GetCNtoSAP(string SAPToken)
         {
-            if(SAPToken == token)
+            if (conn.State == System.Data.ConnectionState.Closed)
+            {
+                try
+                {
+                    conn.Open();
+                }
+                catch(Exception ex)
+                {
+                    log.Error("Cannot open database due to error", ex);
+                }
+            }
+            if (SAPToken == token)
             {
                 try
                 {
@@ -114,11 +148,13 @@ namespace DASWebService
                 }
                 catch (Exception ex)
                 {
-                    throw ex;
+                    log.Error("Fail to get data - ", ex);
+                    return null;
                 }
             }
             else
             {
+                log.Warn("GetCNtoSAP - Provide wrong token");
                 return null;
             }
         }
