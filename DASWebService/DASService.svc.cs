@@ -17,7 +17,7 @@ namespace DASWebService
         private static readonly log4net.ILog log = log4net.LogManager.GetLogger
     (System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
         SqlConnection conn = new SqlConnection(ConfigurationManager.ConnectionStrings["ConStr"].ConnectionString);
-        public string token = "7FEBE4AD-9B44-406B-A756-F553E7F212AE";
+        string token = ConfigurationManager.AppSettings["Token"].ToString();
         public string InsertCus(Customer infoCus)
         {
             if (conn.State == System.Data.ConnectionState.Closed)
@@ -44,6 +44,7 @@ namespace DASWebService
                         cmd.Parameters.Add("@CustNo", SqlDbType.VarChar).Value = infoCus.CustNo;
                         cmd.Parameters.Add("@Status", SqlDbType.Decimal).Value = infoCus.Status;
                         int result = cmd.ExecuteNonQuery();
+                        conn.Close();
                         if (result == 1)
                         {
                             log.Info(infoCus.ShiptoName.ToString() + " - Insert to CUSTMSTTABLE success");
@@ -76,7 +77,7 @@ namespace DASWebService
                 {
                     conn.Open();
                 }
-                catch(Exception ex)
+                catch (Exception ex)
                 {
                     log.Error("Cannot open database due to error", ex);
                 }
@@ -96,6 +97,7 @@ namespace DASWebService
                         cmd.Parameters.Add("@CompanyID", SqlDbType.VarChar).Value = proHier.CompanyID;
                         cmd.Parameters.Add("@Status", SqlDbType.Decimal).Value = proHier.Status;
                         int result = cmd.ExecuteNonQuery();
+                        conn.Close();
                         if (result == 1)
                         {
                             log.Info(proHier.BrandCode.ToString() + " - Insert to PRODHIERTABLE success");
@@ -127,7 +129,7 @@ namespace DASWebService
                 {
                     conn.Open();
                 }
-                catch(Exception ex)
+                catch (Exception ex)
                 {
                     log.Error("Cannot open database due to error", ex);
                 }
@@ -139,10 +141,20 @@ namespace DASWebService
                     using (SqlCommand cmd = new SqlCommand("spr_GetDataSAPPI", conn))
                     {
                         cmd.CommandType = CommandType.StoredProcedure;
+                        cmd.CommandTimeout = 300;
                         SqlDataAdapter da = new SqlDataAdapter(cmd);
                         DataSet ds = new DataSet();
                         da.Fill(ds);
                         cmd.ExecuteNonQuery();
+                        conn.Close();
+                        if(ds.Tables[0].Rows.Count > 1)
+                        {
+                            log.Info("Successful get Credit Notes for SAP: Total record "+ ds.Tables[0].Rows.Count);
+                        }
+                        if(ds.Tables[0].Rows.Count  == 0)
+                        {
+                            log.Info("Get Credit Note: No record");
+                        }
                         return ds;
                     }
                 }
@@ -157,6 +169,12 @@ namespace DASWebService
                 log.Warn("GetCNtoSAP - Provide wrong token");
                 return null;
             }
+        }
+        public List<CreditNote> GetCNsbyList(string token)
+        {
+            List<CreditNote> CNs = new List<CreditNote>();
+
+            return CNs;
         }
     }
 }
