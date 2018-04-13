@@ -18,7 +18,7 @@ namespace DASWebService
     (System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
         SqlConnection conn = new SqlConnection(ConfigurationManager.ConnectionStrings["ConStr"].ConnectionString);
         string token = ConfigurationManager.AppSettings["Token"].ToString();
-        public string InsertCus(Customer infoCus)
+        public int InsertCus(Customer infoCus)
         {
             if (conn.State == System.Data.ConnectionState.Closed)
             {
@@ -29,6 +29,7 @@ namespace DASWebService
                 catch (Exception ex)
                 {
                     log.Error("Cannot open database due to error", ex);
+                    return 0;
                 }
             }
             if(infoCus.Token == token)
@@ -48,11 +49,11 @@ namespace DASWebService
                         if (result == 1)
                         {
                             log.Info(infoCus.ShiptoName.ToString() + " - Insert to CUSTMSTTABLE success");
-                            return "Insert success to table CUSTMSTTABLE";
+                            return 1;
                         }
                         else
                         {
-                            return "Fail to insert table CUSTMSTTABLE";
+                            return 0;
                         }
                     }
                 }
@@ -60,16 +61,16 @@ namespace DASWebService
                 {
                     //throw ex;
                     log.Error(infoCus.ShiptoName.ToString() + " - Fail to insert - ",ex);
-                    return "Fail to insert table CUSTMSTTABLE";
+                    return 0;
                 }
             }else
             {
                 log.Warn(infoCus.ShiptoName.ToString() + " - Provide wrong token");
-                return "Provide wrong token";
+                return 0;
             }
             
         }
-        public string InsertProHier(ProHier proHier)
+        public int InsertProHier(ProHier proHier)
         {
             if (conn.State == System.Data.ConnectionState.Closed)
             {
@@ -80,6 +81,7 @@ namespace DASWebService
                 catch (Exception ex)
                 {
                     log.Error("Cannot open database due to error", ex);
+                    return 0;
                 }
             }
             if (proHier.Token == token)
@@ -101,24 +103,24 @@ namespace DASWebService
                         if (result == 1)
                         {
                             log.Info(proHier.BrandCode.ToString() + " - Insert to PRODHIERTABLE success");
-                            return "Insert success to table PRODHIERTABLE";
+                            return 1;
                         }
                         else
                         {
-                            return "Fail to insert table PRODHIERTABLE";
+                            return 0;
                         }
                     }
                 }
                 catch (Exception ex)
                 {
                     log.Error(proHier.BrandCode.ToString() + " - Fail to insert due to - ", ex);
-                    return "Fail to insert table PRODHIERTABLE";
+                    return 0;
                 }
             }
             else
             {
                 log.Warn(proHier.BrandCode.ToString() + " - Provide wrong token");
-                return "Provide wrong token";
+                return 0;
             }
         }
         public DataSet GetCNtoSAP(string SAPToken)

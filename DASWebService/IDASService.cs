@@ -13,9 +13,9 @@ namespace DASWebService
     public interface IDASService
     {
         [OperationContract]
-        string InsertCus(Customer infoCus);
+        int InsertCus(Customer infoCus);
         [OperationContract]
-        string InsertProHier(ProHier proHier);
+        int InsertProHier(ProHier proHier);
         [OperationContract]
         DataSet GetCNtoSAP(string token);
         [OperationContract]
